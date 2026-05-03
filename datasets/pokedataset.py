@@ -8,11 +8,11 @@ class PokemonDataset(Dataset):
         self.img_dir = img_dir
         self.image_files = [
             f for f in os.listdir(img_dir)
-            if f.lower().endswith(".png")
+            if f.lower().endswith(".jpg")
         ]
 
         self.transform = transforms.Compose([
-            transforms.Resize((64, 64)),
+            transforms.Resize((32, 32)),
             transforms.ToTensor(),
         ])
 
