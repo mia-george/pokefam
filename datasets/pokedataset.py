@@ -12,7 +12,7 @@ class PokemonDataset(Dataset):
         ]
 
         self.transform = transforms.Compose([
-            transforms.Resize((32, 32)),
+            transforms.Resize((64, 64)),
             transforms.ToTensor(),
         ])
 

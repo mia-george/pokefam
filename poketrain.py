@@ -4,13 +4,14 @@ import torch
 import numpy as np
 import torch.nn as nn
 import matplotlib.pyplot as plt
+import torch.nn.functional as F 
 
 def process_data(dataset):
-    loader = DataLoader(dataset, batch_size=32, shuffle=True)
-    return loader  
+    pokeloader = DataLoader(dataset, batch_size=32, shuffle=True)
+    return pokeloader  
 
 class Encoder(nn.Module):  
-  def __init__(self, input_dim=49152, hidden_dim=1024, latent_dim=128):  
+  def __init__(self, input_dim=12288, hidden_dim=512, latent_dim=128):  
     super(Encoder, self).__init__()  
     self.fc1 = nn.Linear(input_dim, hidden_dim)  
     self.fc_mu = nn.Linear(hidden_dim, latent_dim)  
@@ -23,7 +24,7 @@ class Encoder(nn.Module):
     return mu, logvar 
 
 class Decoder(nn.Module):  
-  def __init__(self, input_dim=49152, hidden_dim=1024, latent_dim=128):  
+  def __init__(self, latent_dim=128, hidden_dim=512, output_dim=12288):  
     super(Decoder, self).__init__()  
     self.fc1 = nn.Linear(latent_dim, hidden_dim)  
     self.fc2 = nn.Linear(hidden_dim, output_dim)  
@@ -33,7 +34,7 @@ class Decoder(nn.Module):
     return torch.sigmoid(self.fc2(h)) 
 
 class VAE(nn.Module):  
-  def __init__(self, input_dim=49152, hidden_dim=1024, latent_dim=128):  
+  def __init__(self, input_dim=12288, hidden_dim=512, latent_dim=128):  
     super(VAE, self).__init__()  
     self.encoder = Encoder(input_dim, hidden_dim, latent_dim)  
     self.decoder = Decoder(latent_dim, hidden_dim, input_dim)  
@@ -49,14 +50,59 @@ class VAE(nn.Module):
     reconstructed = self.decoder(z)  
     return reconstructed, mu, logvar 
 
+def loss_function(recon_x, x, mu, logvar):  
+  # Reconstruction loss (binary cross entropy)  
+  recon_loss = F.binary_cross_entropy(recon_x, x, reduction='sum')  
+
+  # KL divergence loss  
+  kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())  
+  return recon_loss + kl_loss 
 
 
 def main():
     dataset = PokemonDataset("data/images")
-    loader = process_data(dataset)
-    images = next(iter(loader))
-    plt.imshow(images[0].permute(1, 2, 0))
-    plt.show()
+    pokeloader = process_data(dataset)
+    # images = next(iter(loader))
+    # plt.imshow(images[0].permute(1, 2, 0))
+    # plt.show()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    epochs = 10  
+    learning_rate = 1e-3  
+
+    # Initialize model, optimizer 
+    model = VAE().to(device)  
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate) 
+
+    # Track losses 
+    train_losses = [] 
+
+    # Training loop
+    model.train()  
+
+    for epoch in range(epochs):  
+      total_loss = 0  
+      for batch_idx, x in enumerate(pokeloader):  
+        x = x.view(-1, 12288).to(device)  # Flatten images 
+        optimizer.zero_grad() 
+
+        recon_x, mu, logvar = model(x) 
+        loss = loss_function(recon_x, x, mu, logvar) 
+        loss.backward() 
+        optimizer.step() 
+     
+        total_loss += loss.item() 
+ 
+      avg_loss = total_loss / len(pokeloader.dataset) 
+      train_losses.append(avg_loss) 
+      print(f"Epoch {epoch+1}, Loss: {avg_loss:.4f}") 
+
+    # Plotting the training loss 
+    plt.plot(train_losses) 
+    plt.title("VAE Training Loss") 
+    plt.xlabel("Epoch") 
+    plt.ylabel("Loss") 
+    plt.grid(True) 
+    plt.show() 
 
 if __name__ == "__main__":
     main()
