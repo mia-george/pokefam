@@ -10,7 +10,7 @@ def process_data(dataset):
     return loader  
 
 class Encoder(nn.Module):  
-  def __init__(self, input_dim=128, hidden_dim=400, latent_dim=20):  
+  def __init__(self, input_dim=49152, hidden_dim=1024, latent_dim=128):  
     super(Encoder, self).__init__()  
     self.fc1 = nn.Linear(input_dim, hidden_dim)  
     self.fc_mu = nn.Linear(hidden_dim, latent_dim)  
@@ -23,7 +23,7 @@ class Encoder(nn.Module):
     return mu, logvar 
 
 class Decoder(nn.Module):  
-  def __init__(self, latent_dim=20, hidden_dim=400, output_dim=784):  
+  def __init__(self, input_dim=49152, hidden_dim=1024, latent_dim=128):  
     super(Decoder, self).__init__()  
     self.fc1 = nn.Linear(latent_dim, hidden_dim)  
     self.fc2 = nn.Linear(hidden_dim, output_dim)  
@@ -33,7 +33,7 @@ class Decoder(nn.Module):
     return torch.sigmoid(self.fc2(h)) 
 
 class VAE(nn.Module):  
-  def __init__(self, input_dim=784, hidden_dim=400, latent_dim=20):  
+  def __init__(self, input_dim=49152, hidden_dim=1024, latent_dim=128):  
     super(VAE, self).__init__()  
     self.encoder = Encoder(input_dim, hidden_dim, latent_dim)  
     self.decoder = Decoder(latent_dim, hidden_dim, input_dim)  
