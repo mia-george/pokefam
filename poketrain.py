@@ -134,7 +134,7 @@ def main():
     for epoch in range(epochs):  
       total_loss = 0  
       for batch_idx, x in enumerate(pokeloader):  
-        x = x.view(-1, 12288).to(device)  # Flatten images 
+        x = x.to(device)   
         optimizer.zero_grad() 
 
         recon_x, mu, logvar = model(x) 
