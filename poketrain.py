@@ -67,14 +67,23 @@ class Encoder(nn.Module):
     return mu, logvar 
 
 class Decoder(nn.Module):  
-  def __init__(self, latent_dim=128, hidden_dim=512, output_dim=12288):  
-    super(Decoder, self).__init__()  
-    self.fc1 = nn.Linear(latent_dim, hidden_dim)  
-    self.fc2 = nn.Linear(hidden_dim, output_dim)  
+  def __init__(self, latent_dim=256):  
+    super().__init__()
+    self.fc = nn.Linear(latent_dim, 256*4*4)
+    self.deconv = nn.Sequential(
+        nn.ConvTranspose2d(256, 128, kernel_size=4, stride=2, padding=1),
+        nn.ReLU(),
+        nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1),
+        nn.ReLU(),
+        nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2, padding=1),
+        nn.ReLU(),
+        nn.ConvTranspose2d(32, 3, kernel_size=4, stride=2, padding=1),
+        nn.Sigmoid()
+    )
 
   def forward(self, z):  
-    h = torch.relu(self.fc1(z))  
-    return torch.sigmoid(self.fc2(h)) 
+    h = self.fc(z).view(-1, 256, 4, 4)
+    return self.deconv(h) 
 
 class VAE(nn.Module):  
   def __init__(self, input_dim=12288, hidden_dim=512, latent_dim=128):  
