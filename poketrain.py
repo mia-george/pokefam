@@ -45,14 +45,23 @@ def show_generated(model, device, n=8, latent_dim=128):
 
 
 class Encoder(nn.Module):  
-  def __init__(self, input_dim=12288, hidden_dim=512, latent_dim=128):  
-    super(Encoder, self).__init__()  
-    self.fc1 = nn.Linear(input_dim, hidden_dim)  
-    self.fc_mu = nn.Linear(hidden_dim, latent_dim)  
-    self.fc_logvar = nn.Linear(hidden_dim, latent_dim) 
+  def __init__(self, latent_dim=256):  
+    super().__init__()
+    self.conv = nn.Sequential(
+        nn.Conv2d(3, 32, kernel_size=4, stride=2, padding=1),
+        nn.ReLU(),
+        nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=1),
+        nn.ReLU(),
+        nn.Conv2d(64, 128, kernel_size=4, stride=2, padding=1),
+        nn.ReLU(),
+        nn.Conv2d(128, 256, kernel_size=4, stride=2, padding=1),
+        nn.ReLU(),
+    )
+    self.fc_mu = nn.Linear(256*4*4, latent_dim)
+    self.fc_logvar = nn.Linear(256*4*4, latent_dim)
 
   def forward(self, x): 
-    h = torch.relu(self.fc1(x)) 
+    h = self.conv(x).view(x.size(0), -1)
     mu = self.fc_mu(h) 
     logvar = self.fc_logvar(h) 
     return mu, logvar 
