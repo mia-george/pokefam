@@ -86,10 +86,10 @@ class Decoder(nn.Module):
     return self.deconv(h) 
 
 class VAE(nn.Module):  
-  def __init__(self, input_dim=12288, hidden_dim=512, latent_dim=128):  
-    super(VAE, self).__init__()  
-    self.encoder = Encoder(input_dim, hidden_dim, latent_dim)  
-    self.decoder = Decoder(latent_dim, hidden_dim, input_dim)  
+  def __init__(self, latent_dim=256):  
+    super().__init__()  
+    self.encoder = Encoder(latent_dim)  
+    self.decoder = Decoder(latent_dim)  
  
   def reparameterize(self, mu, logvar):  
     std = torch.exp(0.5 * logvar)   
