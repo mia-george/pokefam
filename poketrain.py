@@ -6,9 +6,43 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 import torch.nn.functional as F 
 
-def process_data(dataset):
-    pokeloader = DataLoader(dataset, batch_size=32, shuffle=True)
-    return pokeloader  
+def show_reconstructions(model, dataset, device, n=8):
+    model.eval()
+    with torch.no_grad():
+        samples = torch.stack([dataset[i] for i in range(n)])  # (n, 3, 64, 64)
+        x = samples.view(n, -1).to(device)
+        recon_x, _, _ = model(x)
+        originals = samples.cpu()
+        reconstructed = recon_x.view(n, 3, 64, 64).cpu()
+
+    fig, axes = plt.subplots(2, n, figsize=(n * 2, 4))
+    for i in range(n):
+        axes[0, i].imshow(originals[i].permute(1, 2, 0).clamp(0, 1))
+        axes[0, i].axis('off')
+        axes[1, i].imshow(reconstructed[i].permute(1, 2, 0).clamp(0, 1))
+        axes[1, i].axis('off')
+
+    axes[0, 0].set_title("Original", fontsize=10)
+    axes[1, 0].set_title("Reconstructed", fontsize=10)
+    plt.tight_layout()
+    plt.show()
+
+
+def show_generated(model, device, n=8, latent_dim=128):
+    model.eval()
+    with torch.no_grad():
+        z = torch.randn(n, latent_dim).to(device)
+        generated = model.decoder(z).view(n, 3, 64, 64).cpu()
+
+    fig, axes = plt.subplots(1, n, figsize=(n * 2, 2))
+    for i in range(n):
+        axes[i].imshow(generated[i].permute(1, 2, 0).clamp(0, 1))
+        axes[i].axis('off')
+
+    plt.suptitle("VAE Generated Images")
+    plt.tight_layout()
+    plt.show()
+
 
 class Encoder(nn.Module):  
   def __init__(self, input_dim=12288, hidden_dim=512, latent_dim=128):  
@@ -61,12 +95,12 @@ def loss_function(recon_x, x, mu, logvar):
 
 def main():
     dataset = PokemonDataset("data/images")
-    pokeloader = process_data(dataset)
+    pokeloader = DataLoader(dataset, batch_size=32, shuffle=True)
     # images = next(iter(loader))
     # plt.imshow(images[0].permute(1, 2, 0))
     # plt.show()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    epochs = 10  
+    epochs = 20
     learning_rate = 1e-3  
 
     # Initialize model, optimizer 
@@ -96,13 +130,18 @@ def main():
       train_losses.append(avg_loss) 
       print(f"Epoch {epoch+1}, Loss: {avg_loss:.4f}") 
 
-    # Plotting the training loss 
+    # Plotting training loss 
     plt.plot(train_losses) 
     plt.title("VAE Training Loss") 
     plt.xlabel("Epoch") 
     plt.ylabel("Loss") 
     plt.grid(True) 
     plt.show() 
+
+    show_reconstructions(model, dataset, device)
+    show_generated(model, device)
+
+
 
 if __name__ == "__main__":
     main()
