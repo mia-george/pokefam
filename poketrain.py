@@ -173,6 +173,9 @@ def main():
  
       avg_loss = total_loss / len(pokeloader.dataset) 
       train_losses.append(avg_loss) 
+      if avg_loss < best_loss:
+            best_loss = avg_loss
+            torch.save(model.state_dict(), 'vae_model.pth')
       print(f"Epoch {epoch+1}, Loss: {avg_loss:.4f}") 
 
     # Plotting training loss 
