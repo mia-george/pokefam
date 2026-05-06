@@ -112,7 +112,7 @@ class VAE(nn.Module):
     reconstructed = self.decoder(z)  
     return reconstructed, mu, logvar 
 
-def loss_function(recon_x, x, mu, logvar, epoch, warmup_epochs=20):
+def loss_function(recon_x, x, mu, logvar, epoch, warmup_epochs=50):
     batch_size = x.size(0)
     recon_loss = F.mse_loss(recon_x, x, reduction='sum') / batch_size
     kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / batch_size
@@ -143,7 +143,7 @@ def main():
     )
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    epochs = 5
+    epochs = 400
     learning_rate = 1e-3  
 
     # Initialize model, optimizer 
@@ -171,7 +171,7 @@ def main():
         optimizer.zero_grad() 
 
         recon_x, mu, logvar = model(x)
-        loss = loss_function(recon_x, x, mu, logvar)
+        loss = loss_function(recon_x, x, mu, logvar, epoch + 1, warmup_epochs=50)
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         optimizer.step()
