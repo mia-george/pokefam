@@ -176,7 +176,9 @@ def main():
       if avg_loss < best_loss:
             best_loss = avg_loss
             torch.save(model.state_dict(), 'vae_model.pth')
-      print(f"Epoch {epoch+1}, Loss: {avg_loss:.4f}") 
+
+      if (epoch + 1) % 10 == 0:
+          print(f"Epoch {epoch+1}, Loss: {avg_loss:.4f}")
 
     # Plotting training loss 
     plt.plot(train_losses) 
