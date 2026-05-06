@@ -38,7 +38,7 @@ def show_reconstructions(model, dataset, device, pokemon_names):
     plt.show()
 
 
-def show_generated(model, device, n=8, latent_dim=64):
+def show_generated(model, device, n=8, latent_dim=256):
     model.eval()
     with torch.no_grad():
         z = torch.randn(n, latent_dim).to(device)
@@ -55,7 +55,7 @@ def show_generated(model, device, n=8, latent_dim=64):
 
 
 class Encoder(nn.Module):  
-  def __init__(self, latent_dim=64):  
+  def __init__(self, latent_dim=256):  
     super().__init__()
     self.conv = nn.Sequential(
         nn.Conv2d(3, 32, kernel_size=4, stride=2, padding=1),
@@ -81,7 +81,7 @@ class Encoder(nn.Module):
     return mu, logvar 
 
 class Decoder(nn.Module):  
-  def __init__(self, latent_dim=64):  
+  def __init__(self, latent_dim=256):  
     super().__init__()
     self.fc = nn.Linear(latent_dim, 256*4*4)
     self.deconv = nn.Sequential(
@@ -103,7 +103,7 @@ class Decoder(nn.Module):
     return self.deconv(h) 
 
 class VAE(nn.Module):  
-  def __init__(self, latent_dim=64):  
+  def __init__(self, latent_dim=256):  
     super().__init__()  
     self.encoder = Encoder(latent_dim)  
     self.decoder = Decoder(latent_dim)  
