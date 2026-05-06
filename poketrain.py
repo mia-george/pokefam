@@ -9,8 +9,6 @@ import torch.nn.functional as F
 import argparse
 
 def show_reconstructions(model, dataset, device, pokemon_names):
-    """Show reconstructions for 2 specific named images."""
-    # Build a lookup from filename stem -> index
     name_to_idx = {os.path.splitext(f)[0].lower(): i for i, f in enumerate(dataset.image_files)}
     indices = []
     for name in pokemon_names:
@@ -123,6 +121,7 @@ def loss_function(recon_x, x, mu, logvar, epoch, warmup_epochs=20):
 
 
 def main():
+    # Argument handling
     parser = argparse.ArgumentParser(description="Train a VAE on Pokémon images.")
     parser.add_argument(
         "pokemon",
@@ -132,12 +131,17 @@ def main():
     )
     args = parser.parse_args()
 
-    dataset = PokemonDataset("data/images")  # always train on all images
+    # Load dataset
+    dataset = PokemonDataset("data/images") 
     print(f"Training on all {len(dataset)} images. Will visualize: {args.pokemon[0]}, {args.pokemon[1]}")
-    pokeloader = DataLoader(dataset, batch_size=32, shuffle=True)
-    # images = next(iter(loader))
-    # plt.imshow(images[0].permute(1, 2, 0))
-    # plt.show()
+    pokeloader = DataLoader(
+        dataset,
+        batch_size=64,      
+        shuffle=True,
+        num_workers=2,      # parallel loading
+        pin_memory=True     # faster CPU→GPU transfer
+    )
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     epochs = 5
     learning_rate = 1e-3  
