@@ -38,7 +38,7 @@ def show_reconstructions(model, dataset, device, pokemon_names):
     plt.show()
 
 
-def show_generated(model, device, n=8, latent_dim=256):
+def show_generated(model, device, n=8, latent_dim=64):
     model.eval()
     with torch.no_grad():
         z = torch.randn(n, latent_dim).to(device)
@@ -122,7 +122,7 @@ class VAE(nn.Module):
 def loss_function(recon_x, x, mu, logvar):
     recon_loss = F.mse_loss(recon_x, x, reduction='mean')
     kl_loss = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
-    return recon_loss + 0.005 * kl_loss
+    return recon_loss + 0.1 * kl_loss
 
 
 def main():

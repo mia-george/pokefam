@@ -25,7 +25,7 @@ def generate_hybrid(model, dataset, device, pokemon1, pokemon2, alpha=0.5):
     with torch.no_grad():
         mu1, _ = model.encoder(img1)
         mu2, _ = model.encoder(img2)
-        z = alpha * mu1 + (1 - alpha) * mu2
+        z = (1 - alpha) * mu1 + alpha * mu2
         hybrid = model.decoder(z)
 
     fig, axes = plt.subplots(1, 3, figsize=(8, 3))
