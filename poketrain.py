@@ -9,11 +9,11 @@ import torch.nn.functional as F
 def show_reconstructions(model, dataset, device, n=8):
     model.eval()
     with torch.no_grad():
-        samples = torch.stack([dataset[i] for i in range(n)])  # (n, 3, 64, 64)
-        x = samples.view(n, -1).to(device)
+        samples = torch.stack([dataset[i] for i in range(n)])  
+        x = samples.to(device) 
         recon_x, _, _ = model(x)
         originals = samples.cpu()
-        reconstructed = recon_x.view(n, 3, 64, 64).cpu()
+        reconstructed = recon_x.cpu()
 
     fig, axes = plt.subplots(2, n, figsize=(n * 2, 4))
     for i in range(n):
@@ -28,7 +28,7 @@ def show_reconstructions(model, dataset, device, n=8):
     plt.show()
 
 
-def show_generated(model, device, n=8, latent_dim=128):
+def show_generated(model, device, n=8, latent_dim=256):
     model.eval()
     with torch.no_grad():
         z = torch.randn(n, latent_dim).to(device)
@@ -102,13 +102,12 @@ class VAE(nn.Module):
     reconstructed = self.decoder(z)  
     return reconstructed, mu, logvar 
 
-def loss_function(recon_x, x, mu, logvar):  
-  # Reconstruction loss (binary cross entropy)  
-  recon_loss = F.binary_cross_entropy(recon_x, x, reduction='sum')  
-
-  # KL divergence loss  
-  kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())  
-  return recon_loss + kl_loss 
+def loss_function(recon_x, x, mu, logvar, epoch, warmup_epochs=20):
+    batch_size = x.size(0)
+    recon_loss = F.mse_loss(recon_x, x, reduction='sum') / batch_size
+    kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / batch_size
+    kl_weight = min(1.0, epoch / warmup_epochs)
+    return recon_loss + kl_weight * kl_loss
 
 
 def main():
@@ -118,7 +117,7 @@ def main():
     # plt.imshow(images[0].permute(1, 2, 0))
     # plt.show()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    epochs = 20
+    epochs = 200
     learning_rate = 1e-3  
 
     # Initialize model, optimizer 
@@ -134,7 +133,7 @@ def main():
     for epoch in range(epochs):  
       total_loss = 0  
       for batch_idx, x in enumerate(pokeloader):  
-        x = x.to(device)   
+        x = x.to(device)  
         optimizer.zero_grad() 
 
         recon_x, mu, logvar = model(x) 
