@@ -8,51 +8,6 @@ import matplotlib.pyplot as plt
 import torch.nn.functional as F
 import argparse
 
-def show_reconstructions(model, dataset, device, pokemon_names):
-    name_to_idx = {os.path.splitext(f)[0].lower(): i for i, f in enumerate(dataset.image_files)}
-    indices = []
-    for name in pokemon_names:
-        idx = name_to_idx.get(name.lower())
-        if idx is None:
-            raise ValueError(f"'{name}' not found in dataset.")
-        indices.append(idx)
-    n = len(indices)
-    model.eval()
-    with torch.no_grad():
-        samples = torch.stack([dataset[i] for i in indices])  
-        x = samples.to(device) 
-        recon_x, _, _ = model(x)
-        originals = samples.cpu()
-        reconstructed = recon_x.cpu()
-
-    fig, axes = plt.subplots(2, n, figsize=(n * 2, 4))
-    for i in range(n):
-        axes[0, i].imshow(originals[i].permute(1, 2, 0).clamp(0, 1))
-        axes[0, i].axis('off')
-        axes[1, i].imshow(reconstructed[i].permute(1, 2, 0).clamp(0, 1))
-        axes[1, i].axis('off')
-
-    axes[0, 0].set_title("Original", fontsize=10)
-    axes[1, 0].set_title("Reconstructed", fontsize=10)
-    plt.tight_layout()
-    plt.show()
-
-
-def show_generated(model, device, n=8, latent_dim=256):
-    model.eval()
-    with torch.no_grad():
-        z = torch.randn(n, latent_dim).to(device)
-        generated = model.decoder(z).view(n, 3, 64, 64).cpu()
-
-    fig, axes = plt.subplots(1, n, figsize=(n * 2, 2))
-    for i in range(n):
-        axes[i].imshow(generated[i].permute(1, 2, 0).clamp(0, 1))
-        axes[i].axis('off')
-
-    plt.suptitle("VAE Generated Images")
-    plt.tight_layout()
-    plt.show()
-
 
 class Encoder(nn.Module):  
   def __init__(self, latent_dim=256):  
@@ -200,14 +155,6 @@ def main():
     plt.ylabel("Loss") 
     plt.grid(True) 
     plt.show() 
-
-    model.load_state_dict(torch.load('vae_model.pth'))
-    model.eval()
-
-    show_reconstructions(model, dataset, device, args.pokemon)
-    show_generated(model, device)
-
-
 
 if __name__ == "__main__":
     main()
