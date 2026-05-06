@@ -86,10 +86,13 @@ class Decoder(nn.Module):
     self.fc = nn.Linear(latent_dim, 256*4*4)
     self.deconv = nn.Sequential(
         nn.ConvTranspose2d(256, 128, kernel_size=4, stride=2, padding=1),
+        nn.BatchNorm2d(128),
         nn.ReLU(),
         nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1),
+        nn.BatchNorm2d(64),
         nn.ReLU(),
         nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2, padding=1),
+        nn.BatchNorm2d(32),
         nn.ReLU(),
         nn.ConvTranspose2d(32, 3, kernel_size=4, stride=2, padding=1),
         nn.Sigmoid()
