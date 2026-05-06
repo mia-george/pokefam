@@ -33,7 +33,7 @@ def generate_hybrid(model, dataset, device, pokemon1, pokemon2, alpha=0.5):
     axes[0].set_title(pokemon1.capitalize())
     axes[0].axis('off')
     axes[1].imshow(hybrid.squeeze(0).cpu().permute(1, 2, 0).clamp(0, 1))
-    axes[1].set_title("Hybrid")
+    axes[1].set_title("Child")
     axes[1].axis('off')
     axes[2].imshow(dataset[idx2].permute(1, 2, 0).clamp(0, 1))
     axes[2].set_title(pokemon2.capitalize())
