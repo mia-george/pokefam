@@ -150,6 +150,13 @@ def main():
     model = VAE().to(device)  
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate) 
 
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, 
+        patience=10,
+        factor=0.5,
+        min_lr=1e-5
+    )
+
     # Track losses 
     train_losses = [] 
     best_loss = float('inf')
@@ -173,6 +180,7 @@ def main():
  
       avg_loss = total_loss / len(pokeloader.dataset) 
       train_losses.append(avg_loss) 
+      scheduler.step(avg_loss)
       if avg_loss < best_loss:
             best_loss = avg_loss
             torch.save(model.state_dict(), 'vae_model.pth')
