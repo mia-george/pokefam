@@ -147,8 +147,8 @@ def main():
     )
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    epochs = 100
-    learning_rate = 1e-3  
+    epochs = 200
+    learning_rate = 5e-4
 
     # Initialize model, optimizer 
     model = VAE().to(device)  
@@ -167,7 +167,7 @@ def main():
 
     # Early stopping
     patience_counter = 0
-    early_stop_patience = 30  # stop if no improvement for 30 epochs
+    early_stop_patience = 50  # stop if no improvement for specified epochs
 
 
     # Training loop
