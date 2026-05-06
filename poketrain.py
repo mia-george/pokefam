@@ -161,6 +161,11 @@ def main():
     train_losses = [] 
     best_loss = float('inf')
 
+    # Early stopping
+    patience_counter = 0
+    early_stop_patience = 30  # stop if no improvement for 30 epochs
+
+
     # Training loop
     model.train()  
 
@@ -184,6 +189,11 @@ def main():
       if avg_loss < best_loss:
             best_loss = avg_loss
             torch.save(model.state_dict(), 'vae_model.pth')
+      else:
+          patience_counter += 1
+          if patience_counter >= early_stop_patience:
+              print(f"Early stopping at epoch {epoch+1}")
+              break
 
       if (epoch + 1) % 10 == 0:
           print(f"Epoch {epoch+1}, Loss: {avg_loss:.4f}")
