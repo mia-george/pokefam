@@ -12,7 +12,7 @@ def find_pokemon(name_to_idx, name):
         raise ValueError(f"'{name}' not found. Available: {similar}")
     return idx
 
-def generate_hybrid(model, dataset, device, pokemon1, pokemon2):
+def generate_hybrid(model, dataset, device, pokemon1, pokemon2, alpha=0.5):
     name_to_idx = {os.path.splitext(f)[0].lower(): i for i, f in enumerate(dataset.image_files)}
 
     idx1 = find_pokemon(name_to_idx, pokemon1)
@@ -20,6 +20,27 @@ def generate_hybrid(model, dataset, device, pokemon1, pokemon2):
 
     img1 = dataset[idx1].unsqueeze(0).to(device)
     img2 = dataset[idx2].unsqueeze(0).to(device)
+
+    model.eval()
+    with torch.no_grad():
+        mu1, _ = model.encoder(img1)
+        mu2, _ = model.encoder(img2)
+        z = alpha * mu1 + (1 - alpha) * mu2
+        hybrid = model.decoder(z)
+
+    fig, axes = plt.subplots(1, 3, figsize=(8, 3))
+    axes[0].imshow(dataset[idx1].permute(1, 2, 0).clamp(0, 1))
+    axes[0].set_title(pokemon1.capitalize())
+    axes[0].axis('off')
+    axes[1].imshow(hybrid.squeeze(0).cpu().permute(1, 2, 0).clamp(0, 1))
+    axes[1].set_title("Hybrid")
+    axes[1].axis('off')
+    axes[2].imshow(dataset[idx2].permute(1, 2, 0).clamp(0, 1))
+    axes[2].set_title(pokemon2.capitalize())
+    axes[2].axis('off')
+    plt.tight_layout()
+    plt.savefig(f"hybrid_{pokemon1}_{pokemon2}.png")
+    plt.show()
         
 
 def main():
@@ -43,7 +64,7 @@ def main():
     model.load_state_dict(torch.load('vae_model.pth', map_location=device))
 
     # Generate hybrid pokemon
-    generate_hybrid(model, dataset, device, args.pokemon[0], args.pokemon[1])
+    generate_hybrid(model, dataset, device, args.pokemon[0], args.pokemon[1], alpha=0.5)
 
 
 if __name__ == "__main__":
