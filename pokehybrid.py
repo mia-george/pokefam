@@ -5,6 +5,23 @@ import torch
 import matplotlib.pyplot as plt
 from poketrain import VAE 
 
+def find_pokemon(name_to_idx, name):
+    idx = name_to_idx.get(name.lower())
+    if idx is None:
+        similar = [k for k in name_to_idx if k.startswith(name.lower().rstrip('0123456789'))]
+        raise ValueError(f"'{name}' not found. Available: {similar}")
+    return idx
+
+def generate_hybrid(model, dataset, device, pokemon1, pokemon2):
+    name_to_idx = {os.path.splitext(f)[0].lower(): i for i, f in enumerate(dataset.image_files)}
+
+    idx1 = find_pokemon(name_to_idx, pokemon1)
+    idx2 = find_pokemon(name_to_idx, pokemon2)
+
+    img1 = dataset[idx1].unsqueeze(0).to(device)
+    img2 = dataset[idx2].unsqueeze(0).to(device)
+        
+
 def main():
     # Argument handling
     parser = argparse.ArgumentParser(description="Train a VAE on Pokémon images.")
@@ -24,6 +41,9 @@ def main():
     # Load trained model
     model = VAE().to(device)
     model.load_state_dict(torch.load('vae_model.pth', map_location=device))
+
+    # Generate hybrid pokemon
+    generate_hybrid(model, dataset, device, args.pokemon[0], args.pokemon[1])
 
 
 if __name__ == "__main__":
