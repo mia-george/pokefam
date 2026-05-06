@@ -125,16 +125,6 @@ def loss_function(recon_x, x, mu, logvar, epoch, warmup_epochs=50):
 
 
 def main():
-    # Argument handling
-    parser = argparse.ArgumentParser(description="Train a VAE on Pokémon images.")
-    parser.add_argument(
-        "pokemon",
-        nargs=2,
-        metavar="POKEMON",
-        help="Enter 2 Pokémon parent names to generate an image of their child. The Pokémon number indicates which evolution to use. e.g. python poketrain.py pikachu1 charmander0"
-    )
-    args = parser.parse_args()
-
     # Load dataset
     dataset = PokemonDataset("data/images") 
     print(f"Training on all {len(dataset)} images. Will visualize: {args.pokemon[0]}, {args.pokemon[1]}")
