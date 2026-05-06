@@ -55,7 +55,7 @@ def show_generated(model, device, n=8, latent_dim=256):
 
 
 class Encoder(nn.Module):  
-  def __init__(self, latent_dim=256):  
+  def __init__(self, latent_dim=64):  
     super().__init__()
     self.conv = nn.Sequential(
         nn.Conv2d(3, 32, kernel_size=4, stride=2, padding=1),
@@ -81,7 +81,7 @@ class Encoder(nn.Module):
     return mu, logvar 
 
 class Decoder(nn.Module):  
-  def __init__(self, latent_dim=256):  
+  def __init__(self, latent_dim=64):  
     super().__init__()
     self.fc = nn.Linear(latent_dim, 256*4*4)
     self.deconv = nn.Sequential(
@@ -119,12 +119,10 @@ class VAE(nn.Module):
     reconstructed = self.decoder(z)  
     return reconstructed, mu, logvar 
 
-def loss_function(recon_x, x, mu, logvar, epoch, warmup_epochs=50):
-    batch_size = x.size(0)
-    recon_loss = F.mse_loss(recon_x, x, reduction='sum') / batch_size
-    kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / batch_size
-    kl_weight = min(1.0, epoch / warmup_epochs)
-    return recon_loss + kl_weight * kl_loss
+def loss_function(recon_x, x, mu, logvar):
+    recon_loss = F.mse_loss(recon_x, x, reduction='mean')
+    kl_loss = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
+    return recon_loss + 0.005 * kl_loss
 
 
 def main():
