@@ -141,6 +141,11 @@ def main():
     epochs = 200
     learning_rate = 5e-4
 
+    # Early stopping
+    patience_counter = 0
+    early_stop_patience = 50  # stop if no improvement for specified number of epochs
+    warmup_epochs = 15
+
     # Initialize model, optimizer 
     model = VAE().to(device)  
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate) 
@@ -156,9 +161,7 @@ def main():
     train_losses = [] 
     best_loss = float('inf')
 
-    # Early stopping
-    patience_counter = 0
-    early_stop_patience = 50  # stop if no improvement for specified epochs
+   
 
 
     # Training loop
@@ -171,7 +174,7 @@ def main():
         optimizer.zero_grad() 
 
         recon_x, mu, logvar = model(x)
-        loss = loss_function(recon_x, x, mu, logvar, epoch + 1, warmup_epochs=50)
+        loss = loss_function(recon_x, x, mu, logvar)
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         optimizer.step()
