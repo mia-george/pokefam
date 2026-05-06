@@ -152,6 +152,7 @@ def main():
 
     # Track losses 
     train_losses = [] 
+    best_loss = float('inf')
 
     # Training loop
     model.train()  
@@ -159,13 +160,14 @@ def main():
     for epoch in range(epochs):  
       total_loss = 0  
       for batch_idx, x in enumerate(pokeloader):  
-        x = x.to(device)  
+        x = x.to(device, non_blocking=True)
         optimizer.zero_grad() 
 
-        recon_x, mu, logvar = model(x) 
-        loss = loss_function(recon_x, x, mu, logvar, epoch)
-        loss.backward() 
-        optimizer.step() 
+        recon_x, mu, logvar = model(x)
+        loss = loss_function(recon_x, x, mu, logvar)
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+        optimizer.step()
      
         total_loss += loss.item() 
  
