@@ -143,7 +143,7 @@ def main():
     )
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    epochs = 400
+    epochs = 100
     learning_rate = 1e-3  
 
     # Initialize model, optimizer 
@@ -205,6 +205,9 @@ def main():
     plt.ylabel("Loss") 
     plt.grid(True) 
     plt.show() 
+
+    model.load_state_dict(torch.load('vae_model.pth'))
+    model.eval()
 
     show_reconstructions(model, dataset, device, args.pokemon)
     show_generated(model, device)
