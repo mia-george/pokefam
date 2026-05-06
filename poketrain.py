@@ -1,15 +1,27 @@
+import os
 from torch.utils.data import DataLoader
 from datasets.pokedataset import PokemonDataset
 import torch
 import numpy as np
 import torch.nn as nn
 import matplotlib.pyplot as plt
-import torch.nn.functional as F 
+import torch.nn.functional as F
+import argparse
 
-def show_reconstructions(model, dataset, device, n=8):
+def show_reconstructions(model, dataset, device, pokemon_names):
+    """Show reconstructions for 2 specific named images."""
+    # Build a lookup from filename stem -> index
+    name_to_idx = {os.path.splitext(f)[0].lower(): i for i, f in enumerate(dataset.image_files)}
+    indices = []
+    for name in pokemon_names:
+        idx = name_to_idx.get(name.lower())
+        if idx is None:
+            raise ValueError(f"'{name}' not found in dataset.")
+        indices.append(idx)
+    n = len(indices)
     model.eval()
     with torch.no_grad():
-        samples = torch.stack([dataset[i] for i in range(n)])  
+        samples = torch.stack([dataset[i] for i in indices])  
         x = samples.to(device) 
         recon_x, _, _ = model(x)
         originals = samples.cpu()
@@ -111,13 +123,23 @@ def loss_function(recon_x, x, mu, logvar, epoch, warmup_epochs=20):
 
 
 def main():
-    dataset = PokemonDataset("data/images")
+    parser = argparse.ArgumentParser(description="Train a VAE on Pokémon images.")
+    parser.add_argument(
+        "pokemon",
+        nargs=2,
+        metavar="POKEMON",
+        help="Enter 2 Pokémon parent names to generate an image of their child. The Pokémon number indicates which evolution to use. e.g. python poketrain.py pikachu1 charmander0"
+    )
+    args = parser.parse_args()
+
+    dataset = PokemonDataset("data/images")  # always train on all images
+    print(f"Training on all {len(dataset)} images. Will visualize: {args.pokemon[0]}, {args.pokemon[1]}")
     pokeloader = DataLoader(dataset, batch_size=32, shuffle=True)
     # images = next(iter(loader))
     # plt.imshow(images[0].permute(1, 2, 0))
     # plt.show()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    epochs = 200
+    epochs = 5
     learning_rate = 1e-3  
 
     # Initialize model, optimizer 
@@ -137,7 +159,7 @@ def main():
         optimizer.zero_grad() 
 
         recon_x, mu, logvar = model(x) 
-        loss = loss_function(recon_x, x, mu, logvar) 
+        loss = loss_function(recon_x, x, mu, logvar, epoch)
         loss.backward() 
         optimizer.step() 
      
@@ -155,7 +177,7 @@ def main():
     plt.grid(True) 
     plt.show() 
 
-    show_reconstructions(model, dataset, device)
+    show_reconstructions(model, dataset, device, args.pokemon)
     show_generated(model, device)
 
 
