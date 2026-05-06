@@ -120,15 +120,15 @@ class VAE(nn.Module):
     return reconstructed, mu, logvar 
 
 def loss_function(recon_x, x, mu, logvar):
-    recon_loss = F.mse_loss(recon_x, x, reduction='mean')
-    kl_loss = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
+    recon_loss = F.mse_loss(recon_x, x, reduction='sum') / x.size(0)
+    kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / x.size(0)
     return recon_loss + 0.1 * kl_loss
 
 
 def main():
     # Load dataset
     dataset = PokemonDataset("data/images") 
-    print(f"Training on all {len(dataset)} images. Will visualize: {args.pokemon[0]}, {args.pokemon[1]}")
+    print(f"Training on {len(dataset)} images. Parents: {args.pokemon[0]}, {args.pokemon[1]}")
     pokeloader = DataLoader(
         dataset,
         batch_size=64,      
@@ -160,9 +160,6 @@ def main():
     # Track losses 
     train_losses = [] 
     best_loss = float('inf')
-
-   
-
 
     # Training loop
     model.train()  
