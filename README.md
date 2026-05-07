@@ -6,11 +6,11 @@ The dataset I’m using contains multiple versions of each Pokémon, so my proje
 
 Here are a few sample images (These are also some in the `samples` folder):
 
-![alt text](samples/hybrid_pikachu1_charmander0.png)
+![Pikachu1 Charmander0 Hybrid](samples/hybrid_pikachu1_charmander0.png)
 
-![alt text](samples/hybrid_pikachu1_charmander3.png)
+![Pikachu1 Charmander3 Hybrid](samples/hybrid_pikachu1_charmander3.png)
 
-![alt text](samples/hybrid_alomomola2_electrode0.png)
+![Alomomola2 Electrode0 Hybrid](samples/hybrid_alomomola2_electrode0.png)
 
 As seen above, the child images are not great. VAEs are usually blurry and do not produce the best quality, but I can make out features of both Pokémon in the hybrid image. It’s more like the essence of the Pokemon than a true hybrid generation, but I was pleased to see that I could at least make out shapes and colors from both parents. I do think it worked better on Pokemon that had similar shapes.
 
