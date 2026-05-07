@@ -2,6 +2,8 @@
 
 **Pokefam** is an AI tool that generates "child" Pokemon by blending two parent Pokemon. It uses a Convolutional Variational Autoencoder (CVAE) to learn the features of different Pokemon and create unique hybrids.
 
+Images are taken from this Kaggle dataset: https://www.kaggle.com/datasets/hlrhegemony/pokemon-image-dataset/data
+
 ## How to Run
 
 ### 1. Install Dependencies
