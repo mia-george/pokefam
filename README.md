@@ -6,7 +6,7 @@ The dataset I’m using contains multiple versions of each Pokémon, so my proje
 
 Here are a few sample images (These are also some in the `samples` folder):
 
-![Pikachu1 Charmander0 Hybrid](samples/hybrid_pikachu1_charmander0.png)
+![Pikachu1 Charmander0 Hybrid](samples/hybrid_pikachu0_charmander0.png)
 
 ![Pikachu1 Charmander3 Hybrid](samples/hybrid_pikachu1_charmander3.png)
 
