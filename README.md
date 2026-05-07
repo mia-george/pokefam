@@ -2,8 +2,6 @@
 
 **Pokefam** is an AI tool that generates "child" Pokemon by blending two parent Pokemon. It uses a Convolutional Variational Autoencoder (CVAE) to learn the features of different Pokemon and create unique hybrids.
 
-Images are taken from this Kaggle dataset: https://www.kaggle.com/datasets/hlrhegemony/pokemon-image-dataset/data
-
 ## How to Run
 
 ### 1. Install Dependencies
@@ -27,7 +25,8 @@ python pokefam.py pikachu0 charmander1
 The resulting image will be saved in the root directory as `hybrid_<parent1>_<parent2>.png`.
 
 ### 3. Training (Optional)
-A pretrained model (`vae_model.pth`) is already available, but if you want to train the model yourself, you can run:
+If you want to train the model yourself, you can run:
 ```bash
 python poketrain.py
 ```
+*A pre-trained model (`vae_model.pth`) is already included.*
