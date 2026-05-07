@@ -99,7 +99,6 @@ def main():
     # Early stopping
     patience_counter = 0
     early_stop_patience = 50  # stop if no improvement for specified number of epochs
-    warmup_epochs = 15
 
     # Initialize model, optimizer 
     model = VAE().to(device)  
@@ -149,12 +148,12 @@ def main():
           print(f"Epoch {epoch+1}, Loss: {avg_loss:.4f}")
 
     # Plotting training loss 
-    plt.plot(train_losses) 
-    plt.title("VAE Training Loss") 
-    plt.xlabel("Epoch") 
-    plt.ylabel("Loss") 
-    plt.grid(True) 
-    plt.show() 
+    # plt.plot(train_losses) 
+    # plt.title("VAE Training Loss") 
+    # plt.xlabel("Epoch") 
+    # plt.ylabel("Loss") 
+    # plt.grid(True) 
+    # plt.show() 
 
 if __name__ == "__main__":
     main()
