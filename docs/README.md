@@ -25,8 +25,7 @@ python pokefam.py pikachu0 charmander1
 The resulting image will be saved in the root directory as `hybrid_<parent1>_<parent2>.png`.
 
 ### 3. Training (Optional)
-If you want to train the model yourself, you can run:
+A pretrained model (`vae_model.pth`) is already available, but if you want to train the model yourself, you can run:
 ```bash
 python poketrain.py
 ```
-*A pre-trained model (`vae_model.pth`) is already included.*
